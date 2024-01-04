@@ -1,5 +1,6 @@
 use pyo3::{
-    types::PyModule, FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
+    types::{PyDict, PyModule},
+    FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
 };
 
 use super::{io::ParameterIOHandler, parameters::ParameterHandler};
@@ -19,6 +20,8 @@ pub fn get_available_force_fields() -> Vec<String> {
 #[derive(FromPyObject)]
 pub struct ForceField(Py<PyAny>);
 
+// TODO these aren't actually getters, per se, because they don't call the
+// python methods. this only works for getting properties and fields
 macro_rules! getters {
     ($($method_name:ident, $return_ty:ty$(;)*)*) => {
         $(pub fn $method_name(&self) -> $return_ty {
@@ -33,6 +36,8 @@ macro_rules! getters {
     }
 }
 
+// TODO as with [getters], these aren't really setter methods. these set
+// properties/fields
 macro_rules! setters {
     ($($method_name:ident => $py_method_name:ident$(;)*)*) => {
         $(pub fn $method_name(&mut self, val: impl IntoPy<Py<PyAny>>) {
@@ -85,6 +90,8 @@ impl ForceField {
         })
     }
 
+    // TODO these actually return references to `self`, which could be quite
+    // tricky I think
     pub fn get_parameter_handler(
         &self,
         tagname: &str,
@@ -94,6 +101,65 @@ impl ForceField {
                 .0
                 .call_method1(py, "get_parameter_handler", (tagname,))?
                 .extract(py)?)
+        })
+    }
+
+    pub fn get_parameter_io_handler(
+        &self,
+        io_format: &str,
+    ) -> PyResult<ParameterIOHandler> {
+        Python::with_gil(|py| {
+            Ok(self
+                .0
+                .call_method1(py, "get_parameter_io_handler", (io_format,))?
+                .extract(py)?)
+        })
+    }
+
+    /// Deregister a [ParameterHandler]. If you have a handler and not a &str,
+    /// pass the handler's tagname
+    pub fn deregister_parameter_handler(&mut self, handler: &str) {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "deregister_parameter_handler", (handler,))
+                .unwrap();
+        })
+    }
+
+    /// Parse a SMIRNOFF force field definition
+    pub fn parse_sources(&mut self, sources: &str) {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "parse_sources", (sources,))
+                .unwrap();
+        })
+    }
+
+    // TODO could this be a Rust HashMap? depends whether the keys and values
+    // are all of the same type
+    pub fn parse_smirnoff_from_source(&self, source: &str) -> Py<PyDict> {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "parse_smirnoff_from_source", (source,))
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
+
+    pub fn to_string(&self) -> String {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "to_string", ())
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
+
+    pub fn to_file(&self, filename: &str) {
+        Python::with_gil(|py| {
+            self.0.call_method1(py, "to_file", (filename,)).unwrap();
         })
     }
 }
@@ -130,6 +196,12 @@ mod tests {
         ff.get_parameter_handler("Angles").unwrap();
         ff.get_parameter_handler("ProperTorsions").unwrap();
         ff.get_parameter_handler("ImproperTorsions").unwrap();
+    }
+
+    #[test]
+    fn to_string() {
+        let ff = ForceField::load("openff-2.1.0.offxml").unwrap();
+        ff.to_string();
     }
 
     #[test]
