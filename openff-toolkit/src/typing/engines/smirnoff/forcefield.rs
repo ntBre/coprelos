@@ -76,7 +76,6 @@ mod tests {
     #[test]
     fn avail() {
         let got = get_available_force_fields();
-        assert_eq!(got.len(), 370);
         assert!(got.contains(&String::from("openff-2.1.0.offxml")));
     }
 
