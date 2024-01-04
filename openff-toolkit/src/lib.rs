@@ -14,7 +14,7 @@ pub use typing::engines::smirnoff::forcefield::{
 macro_rules! get_props {
     ($($method_name:ident, $return_ty:ty$(;)*)*) => {
         $(pub fn $method_name(&self) -> $return_ty {
-            Python::with_gil(|py| {
+            pyo3::Python::with_gil(|py| {
                 self.0
                 .getattr(py, stringify!($method_name))
                 .unwrap()
