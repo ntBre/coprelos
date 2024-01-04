@@ -1,5 +1,11 @@
+testflags := --
+
+ifdef TFLAGS
+	testflags += $(TFLAGS)
+endif
+
 test:
-	cargo test --workspace
+	cargo test --workspace $(testflags)
 
 cover:
 	cargo tarpaulin --skip-clean --out Html --color=never --workspace
