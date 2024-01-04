@@ -1,9 +1,11 @@
+use openff_interchange::Interchange;
+use openff_units::Quantity;
 use pyo3::{
     types::{PyDict, PyModule},
     FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
 };
 
-use crate::topology::Topology;
+use crate::topology::{Molecule, Topology};
 
 use super::{io::ParameterIOHandler, parameters::ParameterHandler};
 
@@ -169,6 +171,36 @@ impl ForceField {
         Python::with_gil(|py| {
             self.0
                 .call_method1(py, "create_openmm_system", (topology.0,))
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
+
+    pub fn create_interchange(&self, topology: Topology) -> Interchange {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "create_interchange", (topology.0,))
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
+
+    pub fn label_molecules(&self, topology: Topology) -> Vec<Py<PyDict>> {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "label_molecules", (topology.0,))
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
+
+    pub fn get_partial_charges(&self, molecule: Molecule) -> Quantity {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "get_partial_charges", (molecule.0,))
                 .unwrap()
                 .extract(py)
                 .unwrap()

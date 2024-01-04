@@ -64,10 +64,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92"
 
 [[package]]
+name = "openff-interchange"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
+]
+
+[[package]]
 name = "openff-toolkit"
 version = "0.1.0"
 dependencies = [
+ "openff-interchange",
+ "openff-units",
  "openmm",
+ "pyo3",
+]
+
+[[package]]
+name = "openff-units"
+version = "0.1.0"
+dependencies = [
  "pyo3",
 ]
 
