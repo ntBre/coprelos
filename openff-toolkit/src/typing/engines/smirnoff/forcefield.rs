@@ -3,6 +3,8 @@ use pyo3::{
     FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
 };
 
+use crate::topology::Topology;
+
 use super::{io::ParameterIOHandler, parameters::ParameterHandler};
 
 const PYMODULE: &str = "openff.toolkit.typing.engines.smirnoff.forcefield";
