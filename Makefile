@@ -1,8 +1,8 @@
 test:
-	cargo test
+	cargo test --workspace
 
 cover:
-	cargo tarpaulin --skip-clean --out Html --color=never
+	cargo tarpaulin --skip-clean --out Html --color=never --workspace
 	brave tarpaulin-report.html
 
 make-env: env.yaml

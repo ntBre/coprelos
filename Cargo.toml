@@ -1,3 +1,8 @@
+[package]
+name = "coprelos"
+version = "0.1.0"
+edition = "2021"
+
 [workspace]
 members = [ "openff-interchange","openff-toolkit", "openff-units", "openmm"]
 resolver = "2"
