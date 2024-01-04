@@ -1,7 +1,7 @@
 use openff_interchange::Interchange;
 use openff_units::Quantity;
 use pyo3::{
-    types::{PyDict, PyModule},
+    types::{IntoPyDict, PyDict, PyModule},
     FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
 };
 
@@ -34,7 +34,8 @@ impl ForceField {
             let m = PyModule::import(py, PYMODULE)?;
             let ff = m.getattr("ForceField")?;
             // TODO handle kwargs, probably with a builder
-            Ok(ff.call1((path,))?.extract()?)
+            let kwargs = [("allow_cosmetic_attributes", true)].into_py_dict(py);
+            Ok(ff.call((path,), Some(kwargs))?.extract()?)
         })
     }
 
