@@ -5,7 +5,10 @@ use pyo3::{
     FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
 };
 
-use crate::topology::{Molecule, Topology};
+use crate::{
+    get_props, set_props,
+    topology::{Molecule, Topology},
+};
 
 use super::{io::ParameterIOHandler, parameters::ParameterHandler};
 
@@ -23,36 +26,6 @@ pub fn get_available_force_fields() -> Vec<String> {
 
 #[derive(FromPyObject)]
 pub struct ForceField(Py<PyAny>);
-
-/// Generate methods on `self` to retrieve Python properties with the same name
-/// and with type `return_ty`.
-macro_rules! get_props {
-    ($($method_name:ident, $return_ty:ty$(;)*)*) => {
-        $(pub fn $method_name(&self) -> $return_ty {
-            Python::with_gil(|py| {
-                self.0
-                .getattr(py, stringify!($method_name))
-                .unwrap()
-                .extract(py)
-                .unwrap()
-            })
-        })*
-    }
-}
-
-/// Generate methods on `self` to set Python properties with the name and
-/// `py_method_name`.
-macro_rules! set_props {
-    ($($method_name:ident => $py_method_name:ident$(;)*)*) => {
-        $(pub fn $method_name(&mut self, val: impl IntoPy<Py<PyAny>>) {
-            Python::with_gil(|py| {
-                self.0
-                .setattr(py, stringify!($py_method_name), val)
-                .unwrap()
-            })
-        })*
-    }
-}
 
 impl ForceField {
     /// Load a ForceField from one SMIRNOFF parameter definition file.
