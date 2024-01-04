@@ -1,6 +1,7 @@
 use std::env;
 
 fn main() {
+    println!("cargo:rerun-if-env-changed=CONDA_PREFIX");
     let Ok(prefix) = env::var("CONDA_PREFIX") else {
         eprintln!(
             "must build inside a conda environment containing openff-toolkit"
