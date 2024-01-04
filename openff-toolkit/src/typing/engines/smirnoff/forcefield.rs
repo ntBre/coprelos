@@ -130,11 +130,14 @@ impl ForceField {
         })
     }
 
-    /// Parse a SMIRNOFF force field definition
-    pub fn parse_sources(&mut self, sources: &str) {
+    /// Parse a SMIRNOFF force field definition. The Python docs claim that this
+    /// can be a "string or file-like object or open file handle or URL," but I
+    /// can't get it to work with a &str. It tries to iterate over the string
+    /// itself and read from files named by each character...
+    pub fn parse_sources(&mut self, source: &str) {
         Python::with_gil(|py| {
             self.0
-                .call_method1(py, "parse_sources", (sources,))
+                .call_method1(py, "parse_sources", (vec![source],))
                 .unwrap();
         })
     }
@@ -243,9 +246,41 @@ mod tests {
     }
 
     #[test]
+    fn register_parameter_handler() {
+        let mut ff = ForceField::load("openff-2.1.0.offxml").unwrap();
+        let bh = ff.get_parameter_handler("Bonds").unwrap();
+        ff.deregister_parameter_handler("Bonds");
+        ff.register_parameter_handler(bh);
+    }
+
+    #[test]
     fn to_string() {
         let ff = ForceField::load("openff-2.1.0.offxml").unwrap();
         ff.to_string();
+    }
+
+    #[test]
+    fn to_file() {
+        let ff = ForceField::load("openff-2.1.0.offxml").unwrap();
+        let out = "/tmp/try.offxml";
+        ff.to_file(out);
+        let got = std::fs::read_to_string(out).unwrap();
+        assert_eq!(got, ff.to_string());
+    }
+
+    #[test]
+    fn parse_sources() {
+        let mut ff = ForceField::load("openff-2.1.0.offxml").unwrap();
+        let s = std::fs::read_to_string("../testfiles/sage-2.1.0.offxml")
+            .expect("didn't find test file");
+        ff.parse_sources(&s);
+    }
+
+    #[test]
+    fn misc() {
+        let ff = ForceField::load("openff-2.1.0.offxml").unwrap();
+        ff.parse_smirnoff_from_source("openff-2.1.0.offxml");
+        ff.get_parameter_io_handler("XML").unwrap();
     }
 
     #[test]
