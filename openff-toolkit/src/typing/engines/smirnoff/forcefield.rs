@@ -164,6 +164,16 @@ impl ForceField {
             self.0.call_method1(py, "to_file", (filename,)).unwrap();
         })
     }
+
+    pub fn create_openmm_system(&self, topology: Topology) -> openmm::System {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "create_openmm_system", (topology.0,))
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
 }
 
 #[cfg(test)]
