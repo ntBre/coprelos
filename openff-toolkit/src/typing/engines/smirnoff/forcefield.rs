@@ -152,7 +152,7 @@ impl ForceField {
     pub fn to_string(&self) -> String {
         Python::with_gil(|py| {
             self.0
-                .call_method1(py, "to_string", ())
+                .call_method0(py, "to_string")
                 .unwrap()
                 .extract(py)
                 .unwrap()
