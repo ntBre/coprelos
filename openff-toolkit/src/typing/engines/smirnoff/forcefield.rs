@@ -24,9 +24,9 @@ pub fn get_available_force_fields() -> Vec<String> {
 #[derive(FromPyObject)]
 pub struct ForceField(Py<PyAny>);
 
-// TODO these aren't actually getters, per se, because they don't call the
-// python methods. this only works for getting properties and fields
-macro_rules! getters {
+/// Generate methods on `self` to retrieve Python properties with the same name
+/// and with type `return_ty`.
+macro_rules! get_props {
     ($($method_name:ident, $return_ty:ty$(;)*)*) => {
         $(pub fn $method_name(&self) -> $return_ty {
             Python::with_gil(|py| {
@@ -40,9 +40,9 @@ macro_rules! getters {
     }
 }
 
-// TODO as with [getters], these aren't really setter methods. these set
-// properties/fields
-macro_rules! setters {
+/// Generate methods on `self` to set Python properties with the name and
+/// `py_method_name`.
+macro_rules! set_props {
     ($($method_name:ident => $py_method_name:ident$(;)*)*) => {
         $(pub fn $method_name(&mut self, val: impl IntoPy<Py<PyAny>>) {
             Python::with_gil(|py| {
@@ -65,14 +65,14 @@ impl ForceField {
         })
     }
 
-    getters! {
+    get_props! {
         aromaticity_model, String;
         author, String;
         date, String;
         registered_parameter_handlers, Vec<String>;
     }
 
-    setters! {
+    set_props! {
         set_aromaticity_model => aromaticity_model;
         set_author => author;
         set_date => date;
