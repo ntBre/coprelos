@@ -17,7 +17,7 @@ pub fn get_available_force_fields() -> Vec<String> {
 #[derive(FromPyObject)]
 pub struct ForceField(Py<PyAny>);
 
-macro_rules! properties {
+macro_rules! getters {
     ($($method_name:ident, $return_ty:ty$(;)*)*) => {
         $(pub fn $method_name(&self) -> $return_ty {
             Python::with_gil(|py| {
@@ -54,7 +54,7 @@ impl ForceField {
         })
     }
 
-    properties! {
+    getters! {
         aromaticity_model, String;
         author, String;
         date, String;
