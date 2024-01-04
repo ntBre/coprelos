@@ -2,6 +2,8 @@ use pyo3::{
     types::PyModule, FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
 };
 
+use super::{io::ParameterIOHandler, parameters::ParameterHandler};
+
 const PYMODULE: &str = "openff.toolkit.typing.engines.smirnoff.forcefield";
 
 pub fn get_available_force_fields() -> Vec<String> {
@@ -58,12 +60,41 @@ impl ForceField {
         aromaticity_model, String;
         author, String;
         date, String;
+        registered_parameter_handlers, Vec<String>;
     }
 
     setters! {
         set_aromaticity_model => aromaticity_model;
         set_author => author;
         set_date => date;
+    }
+
+    pub fn register_parameter_handler(&mut self, ph: ParameterHandler) {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "register_parameter_handler", (ph.0,))
+                .unwrap();
+        })
+    }
+
+    pub fn register_parameter_io_handler(&mut self, ph: ParameterIOHandler) {
+        Python::with_gil(|py| {
+            self.0
+                .call_method1(py, "register_parameter_handler", (ph.0,))
+                .unwrap();
+        })
+    }
+
+    pub fn get_parameter_handler(
+        &self,
+        tagname: &str,
+    ) -> PyResult<ParameterHandler> {
+        Python::with_gil(|py| {
+            Ok(self
+                .0
+                .call_method1(py, "get_parameter_handler", (tagname,))?
+                .extract(py)?)
+        })
     }
 }
 
@@ -93,10 +124,20 @@ mod tests {
     }
 
     #[test]
+    fn get_parameter_handler() {
+        let ff = ForceField::load("openff-2.1.0.offxml").unwrap();
+        ff.get_parameter_handler("Bonds").unwrap();
+        ff.get_parameter_handler("Angles").unwrap();
+        ff.get_parameter_handler("ProperTorsions").unwrap();
+        ff.get_parameter_handler("ImproperTorsions").unwrap();
+    }
+
+    #[test]
     fn getters_run() {
         let ff = ForceField::load("openff-2.1.0.offxml").unwrap();
         ff.author();
         ff.date();
+        ff.registered_parameter_handlers();
     }
 
     #[test]
