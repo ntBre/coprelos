@@ -24,7 +24,9 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 name = "coprelos"
 version = "0.1.0"
 dependencies = [
+ "openff-qcsubmit",
  "openff-toolkit",
+ "qcportal",
 ]
 
 [[package]]
@@ -75,6 +77,14 @@ name = "openff-interchange"
 version = "0.1.0"
 dependencies = [
  "pyo3",
+]
+
+[[package]]
+name = "openff-qcsubmit"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
+ "qcportal",
 ]
 
 [[package]]
@@ -192,6 +202,13 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "qcportal"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
 ]
 
 [[package]]

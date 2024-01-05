@@ -5,7 +5,9 @@ edition = "2021"
 
 [dependencies]
 openff-toolkit = { path = "openff-toolkit" }
+openff-qcsubmit = { path = "openff-qcsubmit" }
+qcportal = { path = "qcportal" }
 
 [workspace]
-members = [ "openff-interchange","openff-toolkit", "openff-units", "openmm"]
+members = [ "openff-interchange", "openff-qcsubmit","openff-toolkit", "openff-units", "openmm", "qcportal"]
 resolver = "2"
