@@ -12,6 +12,12 @@ const PYMODULE: &str = "openff.toolkit.topology.topology";
 #[derive(FromPyObject)]
 pub struct Topology(pub(crate) Py<PyAny>);
 
+impl Default for Topology {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Topology {
     pub fn new() -> Self {
         Python::with_gil(|py| {

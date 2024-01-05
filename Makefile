@@ -7,6 +7,9 @@ endif
 test:
 	cargo test --workspace $(testflags)
 
+clippy:
+	cargo clippy --workspace
+
 cover:
 	cargo tarpaulin --skip-clean --out Html --color=never --workspace
 	brave tarpaulin-report.html

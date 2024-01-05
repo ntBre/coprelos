@@ -15,6 +15,12 @@ impl IntoPy<Py<PyAny>> for Molecule {
     }
 }
 
+impl Default for Molecule {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Molecule {
     pub fn new() -> Self {
         Python::with_gil(|py| {

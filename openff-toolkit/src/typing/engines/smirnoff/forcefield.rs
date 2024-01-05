@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use openff_interchange::Interchange;
 use openff_units::Quantity;
 use pyo3::{
@@ -27,6 +29,19 @@ pub fn get_available_force_fields() -> Vec<String> {
 #[derive(FromPyObject)]
 pub struct ForceField(Py<PyAny>);
 
+impl Display for ForceField {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let s: String = Python::with_gil(|py| {
+            self.0
+                .call_method0(py, "to_string")
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        });
+        write!(f, "{s}")
+    }
+}
+
 impl ForceField {
     /// Load a ForceField from one SMIRNOFF parameter definition file.
     pub fn load(path: &str) -> PyResult<Self> {
@@ -35,7 +50,7 @@ impl ForceField {
             let ff = m.getattr("ForceField")?;
             // TODO handle kwargs, probably with a builder
             let kwargs = [("allow_cosmetic_attributes", true)].into_py_dict(py);
-            Ok(ff.call((path,), Some(kwargs))?.extract()?)
+            ff.call((path,), Some(kwargs))?.extract()
         })
     }
 
@@ -75,10 +90,9 @@ impl ForceField {
         tagname: &str,
     ) -> PyResult<ParameterHandler> {
         Python::with_gil(|py| {
-            Ok(self
-                .0
+            self.0
                 .call_method1(py, "get_parameter_handler", (tagname,))?
-                .extract(py)?)
+                .extract(py)
         })
     }
 
@@ -87,10 +101,9 @@ impl ForceField {
         io_format: &str,
     ) -> PyResult<ParameterIOHandler> {
         Python::with_gil(|py| {
-            Ok(self
-                .0
+            self.0
                 .call_method1(py, "get_parameter_io_handler", (io_format,))?
-                .extract(py)?)
+                .extract(py)
         })
     }
 
@@ -122,16 +135,6 @@ impl ForceField {
         Python::with_gil(|py| {
             self.0
                 .call_method1(py, "parse_smirnoff_from_source", (source,))
-                .unwrap()
-                .extract(py)
-                .unwrap()
-        })
-    }
-
-    pub fn to_string(&self) -> String {
-        Python::with_gil(|py| {
-            self.0
-                .call_method0(py, "to_string")
                 .unwrap()
                 .extract(py)
                 .unwrap()
