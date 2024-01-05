@@ -36,9 +36,7 @@ fn filter_opt_data(
         Box::new(ElementFilter::new(elements)),
         Box::new(ConformerRMSDFilter::new(max_opt_conformers)),
         // Box::new(ChargeCheckFilter()),
-    ]);
-
-    dataset
+    ])
 }
 
 #[test]

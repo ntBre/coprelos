@@ -5,13 +5,15 @@ use pyo3::{
     FromPyObject, IntoPy, Py, PyAny, Python,
 };
 use qcportal::PortalClient;
-use utils::get_props;
+use utils::{get_props, into_py};
 
 use filters::Filter;
 
 pub mod filters;
 
 const PYMODULE: &str = "openff.qcsubmit.results";
+
+pub trait BaseResultCollection {}
 
 #[derive(Clone, FromPyObject)]
 pub struct Entry(Py<PyAny>);
@@ -97,17 +99,11 @@ macro_rules! result_collection {
 
         /// apply `filters` to the entries in `self` and overwrite self with the
         /// results
-        pub fn filter(&mut self, filters: &[Box<dyn Filter>]) {
-            let filters: Vec<_> = filters.iter().map(|f| f.as_py()).collect();
-            Python::with_gil(|py| {
-                let tuple = pyo3::types::PyTuple::new(py, filters);
-                let new = self.0
-                .call_method1(py, "filter", tuple)
-                .unwrap()
-                .extract(py)
-                .unwrap();
-                self.0 = new;
-            })
+        pub fn filter(mut self, filters: &[Box<dyn Filter<$name>>]) -> Self {
+            for filter in filters {
+                self = filter.apply(self);
+            }
+            self
         }
     })*
 }
@@ -117,3 +113,11 @@ result_collection! {
     OptimizationResultCollection,
     TorsionDriveResultCollection,
 }
+
+into_py! {
+    OptimizationResultCollection,
+    TorsionDriveResultCollection,
+}
+
+impl BaseResultCollection for OptimizationResultCollection {}
+impl BaseResultCollection for TorsionDriveResultCollection {}

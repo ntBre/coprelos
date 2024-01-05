@@ -4,6 +4,8 @@ use pyo3::{
 };
 use qcportal::record_models::RecordStatus;
 
+use super::BaseResultCollection;
+
 const PYMODULE: &str = "openff.qcsubmit.results.filters";
 
 #[derive(FromPyObject)]
@@ -101,42 +103,46 @@ impl UnperceivableStereoFilter {
     }
 }
 
-pub trait Filter {
-    fn as_py(&self) -> Py<PyAny>;
+pub trait Filter<T: BaseResultCollection> {
+    fn apply(&self, dataset: T) -> T;
 }
 
-impl Filter for ConformerRMSDFilter {
-    fn as_py(&self) -> Py<PyAny> {
-        self.0.clone()
+fn apply<
+    F: IntoPy<Py<PyAny>>,
+    T: BaseResultCollection + for<'a> FromPyObject<'a> + IntoPy<Py<PyAny>>,
+>(
+    filter: F,
+    dataset: T,
+) -> T {
+    Python::with_gil(|py| {
+        filter
+            .into_py(py)
+            .call_method1(py, "apply", (dataset,))
+            .unwrap()
+            .extract(py)
+            .unwrap()
+    })
+}
+
+macro_rules! make_filter {
+    ($($struct:ident$(,)?)*) => {
+        $(impl<T> Filter<T> for $struct
+        where
+        T: BaseResultCollection + IntoPy<Py<PyAny>> + for<'a> FromPyObject<'a>,
+        {
+            fn apply(&self, dataset: T) -> T {
+                apply(&self.0, dataset)
+            }
+        })*
     }
 }
-impl Filter for ConnectivityFilter {
-    fn as_py(&self) -> Py<PyAny> {
-        self.0.clone()
-    }
-}
-impl Filter for ElementFilter {
-    fn as_py(&self) -> Py<PyAny> {
-        self.0.clone()
-    }
-}
-impl Filter for HydrogenBondFilter {
-    fn as_py(&self) -> Py<PyAny> {
-        self.0.clone()
-    }
-}
-impl Filter for RecordStatusFilter {
-    fn as_py(&self) -> Py<PyAny> {
-        self.0.clone()
-    }
-}
-impl Filter for ResultRecordFilter {
-    fn as_py(&self) -> Py<PyAny> {
-        self.0.clone()
-    }
-}
-impl Filter for UnperceivableStereoFilter {
-    fn as_py(&self) -> Py<PyAny> {
-        self.0.clone()
-    }
+
+make_filter! {
+    ConformerRMSDFilter,
+    ConnectivityFilter,
+    ElementFilter,
+    HydrogenBondFilter,
+    RecordStatusFilter,
+    ResultRecordFilter,
+    UnperceivableStereoFilter,
 }

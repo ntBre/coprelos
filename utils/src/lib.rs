@@ -40,11 +40,5 @@ macro_rules! into_py {
                 self.0
             }
         })*
-        $(impl AsRef<PyAny> for $struct {
-            fn as_ref(&self) -> &PyAny {
-                Python::with_gil(|py| self.0.as_ref(py))
-            }
-        })*
-
     }
 }
