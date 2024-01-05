@@ -2,7 +2,7 @@ use openff_interchange::Interchange;
 use openff_units::Quantity;
 use pyo3::{
     types::{IntoPyDict, PyDict, PyModule},
-    FromPyObject, IntoPy, Py, PyAny, PyResult, Python,
+    FromPyObject, Py, PyAny, PyResult, Python,
 };
 
 use crate::{

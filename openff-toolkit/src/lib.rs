@@ -30,7 +30,7 @@ macro_rules! get_props {
 #[macro_export]
 macro_rules! set_props {
     ($($method_name:ident => $py_method_name:ident$(;)*)*) => {
-        $(pub fn $method_name(&mut self, val: impl IntoPy<Py<PyAny>>) {
+        $(pub fn $method_name(&mut self, val: impl pyo3::IntoPy<pyo3::Py<pyo3::PyAny>>) {
             Python::with_gil(|py| {
                 self.0
                 .setattr(py, stringify!($py_method_name), val)
