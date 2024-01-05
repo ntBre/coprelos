@@ -15,4 +15,4 @@ cover:
 	brave tarpaulin-report.html
 
 make-env: env.yaml
-	mamba env create -f $^
+	mamba env create -f $^ --force
