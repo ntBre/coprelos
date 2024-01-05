@@ -9,6 +9,7 @@ edition = "2021"
 openmm = { path = "../openmm" }
 openff-interchange = { path = "../openff-interchange" }
 openff-units = { path = "../openff-units" }
+utils = { path = "../utils" }
 
 [dependencies.pyo3]
 version = "0.20.1"

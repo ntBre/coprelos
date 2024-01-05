@@ -6,11 +6,9 @@ use pyo3::{
     types::{IntoPyDict, PyDict, PyModule},
     FromPyObject, Py, PyAny, PyResult, Python,
 };
+use utils::{get_props, set_props};
 
-use crate::{
-    get_props, set_props,
-    topology::{Molecule, Topology},
-};
+use crate::topology::{Molecule, Topology};
 
 use super::{io::ParameterIOHandler, parameters::ParameterHandler};
 

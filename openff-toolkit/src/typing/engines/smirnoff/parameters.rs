@@ -5,8 +5,7 @@ use pyo3::{
     types::{IntoPyDict, PyList},
     FromPyObject, Py, PyAny, PyObject, Python,
 };
-
-use crate::{get_props, set_props};
+use utils::{get_props, set_props};
 
 #[derive(FromPyObject)]
 pub struct ParameterHandler(pub(crate) Py<PyAny>);

@@ -2,8 +2,9 @@ use pyo3::{
     types::{PyIterator, PyModule},
     FromPyObject, Py, PyAny, PyObject, Python,
 };
+use utils::get_props;
 
-use crate::{get_props, Molecule};
+use crate::Molecule;
 
 const PYMODULE: &str = "openff.toolkit.topology.topology";
 

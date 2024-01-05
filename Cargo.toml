@@ -9,5 +9,13 @@ openff-qcsubmit = { path = "openff-qcsubmit" }
 qcportal = { path = "qcportal" }
 
 [workspace]
-members = [ "openff-interchange", "openff-qcsubmit","openff-toolkit", "openff-units", "openmm", "qcportal"]
+members = [
+"openff-interchange",
+"openff-qcsubmit",
+"openff-toolkit",
+"openff-units",
+"openmm",
+"qcportal",
+"utils"
+]
 resolver = "2"
