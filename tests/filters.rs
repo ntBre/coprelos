@@ -1,10 +1,17 @@
-use openff_qcsubmit::results::OptimizationResultCollection;
+use openff_qcsubmit::results::{
+    filters::{
+        ConformerRMSDFilter, ConnectivityFilter, ElementFilter,
+        RecordStatusFilter, UnperceivableStereoFilter,
+    },
+    OptimizationResultCollection,
+};
+use qcportal::record_models::RecordStatus;
 
 fn filter_opt_data(
     mut dataset: OptimizationResultCollection,
     records_to_remove: Vec<usize>,
     include_iodine: bool,
-    _max_opt_conformers: usize,
+    max_opt_conformers: usize,
 ) -> OptimizationResultCollection {
     let mut entries = dataset.entries();
     let key = entries.keys().next().unwrap().to_owned();
@@ -22,20 +29,22 @@ fn filter_opt_data(
 
     dataset.set_entries(entries);
     // filter is going to take a &[Box<dyn Filter>]
-    // dataset.filter(&[
-    //     RecordStatusFilter::new(RecordStatus::Complete),
-    //     ConnectivityFilter::new(1.2),
-    //     UnperceivableStereoFilter::new(),
-    //     ElementFilter::new(elements),
-    //     ConformerRMSDFilter::new(max_opt_conformers),
-    //     ChargeCheckFilter(),
-    // ]);
+    dataset.filter(&[
+        Box::new(RecordStatusFilter::new(RecordStatus::Complete)),
+        Box::new(ConnectivityFilter::new(1.2)),
+        Box::new(UnperceivableStereoFilter::new()),
+        Box::new(ElementFilter::new(elements)),
+        Box::new(ConformerRMSDFilter::new(max_opt_conformers)),
+        // Box::new(ChargeCheckFilter()),
+    ]);
 
     dataset
 }
 
 #[test]
 fn filter_opt() {
+    // this has 400 entries, I should narrow it down to some subset that still
+    // exercises all of the filters
     let dataset = OptimizationResultCollection::parse_file(
         "testfiles/download_opt_want.json",
     )

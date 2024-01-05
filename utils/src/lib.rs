@@ -29,3 +29,22 @@ macro_rules! set_props {
         })*
     }
 }
+
+/// Generate implementations of IntoPy<Py<PyAny>> and AsRef<PyAny> for a tuple
+/// struct containing a Py<PyAny> as its first field
+#[macro_export]
+macro_rules! into_py {
+    ($($struct:ident$(,)?)*) => {
+        $(impl pyo3::IntoPy<pyo3::Py<pyo3::PyAny>> for $struct {
+            fn into_py(self, _py: Python<'_>) -> Py<PyAny> {
+                self.0
+            }
+        })*
+        $(impl AsRef<PyAny> for $struct {
+            fn as_ref(&self) -> &PyAny {
+                Python::with_gil(|py| self.0.as_ref(py))
+            }
+        })*
+
+    }
+}

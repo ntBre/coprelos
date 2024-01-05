@@ -22,3 +22,36 @@ impl IntoPy<Py<PyAny>> for PortalClient {
         self.0
     }
 }
+
+pub mod record_models {
+    use pyo3::{types::PyModule, IntoPy, Py, PyAny, Python};
+
+    const PYMODULE: &str = "qcportal.record_models";
+
+    pub enum RecordStatus {
+        Cancelled,
+        Complete,
+        Deleted,
+        Error,
+        Invalid,
+        Running,
+        Waiting,
+    }
+
+    impl IntoPy<Py<PyAny>> for RecordStatus {
+        fn into_py(self, py: Python<'_>) -> Py<PyAny> {
+            let m = PyModule::import(py, PYMODULE).unwrap();
+            let en = m.getattr("RecordStatusEnum").unwrap();
+            let attr = match self {
+                RecordStatus::Complete => "complete",
+                RecordStatus::Cancelled => "cancelled",
+                RecordStatus::Deleted => "deleted",
+                RecordStatus::Error => "error",
+                RecordStatus::Invalid => "invalid",
+                RecordStatus::Running => "running",
+                RecordStatus::Waiting => "waiting",
+            };
+            en.getattr(attr).unwrap().into()
+        }
+    }
+}

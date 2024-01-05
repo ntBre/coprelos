@@ -7,6 +7,12 @@ use pyo3::{
 use qcportal::PortalClient;
 use utils::get_props;
 
+use filters::Filter;
+
+pub mod filters;
+
+const PYMODULE: &str = "openff.qcsubmit.results";
+
 #[derive(Clone, FromPyObject)]
 pub struct Entry(Py<PyAny>);
 
@@ -21,8 +27,6 @@ impl Entry {
         record_id, usize;
     }
 }
-
-const PYMODULE: &str = "openff.qcsubmit.results";
 
 macro_rules! result_collection {
 ($($name:ident$(,)?)*) => {
@@ -91,6 +95,20 @@ macro_rules! result_collection {
             })
         }
 
+        /// apply `filters` to the entries in `self` and overwrite self with the
+        /// results
+        pub fn filter(&mut self, filters: &[Box<dyn Filter>]) {
+            let filters: Vec<_> = filters.iter().map(|f| f.as_py()).collect();
+            Python::with_gil(|py| {
+                let tuple = pyo3::types::PyTuple::new(py, filters);
+                let new = self.0
+                .call_method1(py, "filter", tuple)
+                .unwrap()
+                .extract(py)
+                .unwrap();
+                self.0 = new;
+            })
+        }
     })*
 }
 }
