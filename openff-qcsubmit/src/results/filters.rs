@@ -104,6 +104,12 @@ impl UnperceivableStereoFilter {
 }
 
 pub trait Filter<T: BaseResultCollection> {
+    /// apply is actually fairly complicated to implement because the base
+    /// `apply` method in Python calls the private `_apply` method, which in
+    /// turn calls `_filter_function`. By only requiring `apply`, implementers
+    /// must actually implement all three of these put together. On the other
+    /// hand, this gives them the flexibility of not calling `to_records`, for
+    /// example, which should save a lot of running time
     fn apply(&self, dataset: T) -> T;
 }
 

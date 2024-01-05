@@ -1,3 +1,5 @@
+use std::fs::read_to_string;
+
 use openff_qcsubmit::results::{
     filters::{
         ConformerRMSDFilter, ConnectivityFilter, ElementFilter, Filter,
@@ -12,8 +14,11 @@ struct ChargeCheckFilter;
 impl Filter<OptimizationResultCollection> for ChargeCheckFilter {
     fn apply(
         &self,
-        dataset: OptimizationResultCollection,
+        mut dataset: OptimizationResultCollection,
     ) -> OptimizationResultCollection {
+        let entries = dataset.entries();
+        dataset.set_entries(entries);
+        // TODO update provenance section with applied filters
         dataset
     }
 }
@@ -66,5 +71,7 @@ fn filter_opt() {
         2003404, 2002930, 2002929, 2002979,
     ];
     let dataset = filter_opt_data(dataset, records_to_remove, false, 12);
-    let _got = dataset.json(2);
+    let got = dataset.json(2);
+    let want = read_to_string("testfiles/filters_no_charge_want.json").unwrap();
+    assert_eq!(got, want);
 }
