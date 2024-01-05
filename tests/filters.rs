@@ -1,11 +1,22 @@
 use openff_qcsubmit::results::{
     filters::{
-        ConformerRMSDFilter, ConnectivityFilter, ElementFilter,
+        ConformerRMSDFilter, ConnectivityFilter, ElementFilter, Filter,
         RecordStatusFilter, UnperceivableStereoFilter,
     },
     OptimizationResultCollection,
 };
 use qcportal::record_models::RecordStatus;
+
+struct ChargeCheckFilter;
+
+impl Filter<OptimizationResultCollection> for ChargeCheckFilter {
+    fn apply(
+        &self,
+        dataset: OptimizationResultCollection,
+    ) -> OptimizationResultCollection {
+        dataset
+    }
+}
 
 fn filter_opt_data(
     mut dataset: OptimizationResultCollection,
@@ -35,7 +46,7 @@ fn filter_opt_data(
         Box::new(UnperceivableStereoFilter::new()),
         Box::new(ElementFilter::new(elements)),
         Box::new(ConformerRMSDFilter::new(max_opt_conformers)),
-        // Box::new(ChargeCheckFilter()),
+        Box::new(ChargeCheckFilter),
     ])
 }
 
