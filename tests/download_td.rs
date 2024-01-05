@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 
-use openff_qcsubmit::TorsionDriveResultCollection;
+use openff_qcsubmit::results::TorsionDriveResultCollection;
 use qcportal::PortalClient;
 
 #[test]

@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 
-use openff_qcsubmit::OptimizationResultCollection;
+use openff_qcsubmit::results::OptimizationResultCollection;
 use qcportal::PortalClient;
 
 #[test]
