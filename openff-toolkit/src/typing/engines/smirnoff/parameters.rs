@@ -66,6 +66,7 @@ impl std::fmt::Debug for Parameter {
 impl Parameter {
     get_props! {
         id, String;
+        smirks, String;
     }
 
     set_props! {
