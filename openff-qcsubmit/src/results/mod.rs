@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::path::Path;
+use std::{collections::HashMap, error::Error};
 
 use pyo3::{
     types::{IntoPyDict, PyModule},
@@ -14,7 +14,13 @@ pub mod filters;
 
 const PYMODULE: &str = "openff.qcsubmit.results";
 
-pub trait BaseResultCollection {}
+pub trait BaseResultCollection
+where
+    Self: Sized,
+{
+    fn parse_file(filename: impl AsRef<Path>) -> Result<Self, Box<dyn Error>>;
+    fn entries(&self) -> HashMap<String, Vec<Entry>>;
+}
 
 #[derive(Clone, FromPyObject)]
 pub struct Entry(Py<PyAny>);
@@ -28,6 +34,8 @@ impl IntoPy<Py<PyAny>> for Entry {
 impl Entry {
     get_props! {
         record_id, usize;
+        cmiles, String;
+        inchi_key, String;
     }
 }
 
@@ -35,6 +43,27 @@ macro_rules! result_collection {
 ($($name:ident$(,)?)*) => {
     $(#[derive(FromPyObject)]
     pub struct $name(Py<PyAny>);
+
+    impl BaseResultCollection for $name {
+        fn parse_file(filename: impl AsRef<Path>) -> Result<Self, Box<dyn Error>> {
+            Python::with_gil(|py| {
+                let m = PyModule::import(py, "openff.qcsubmit.results").unwrap();
+                Ok(m.getattr(stringify!($name))?
+                    .call_method1("parse_file", (filename.as_ref(),))?
+                    .extract()?)
+            })
+        }
+
+        fn entries(&self) -> HashMap<String, Vec<Entry>> {
+            Python::with_gil(|py| {
+                self.0
+                .getattr(py, "entries")
+                .unwrap()
+                .extract(py)
+                .unwrap()
+            })
+        }
+    }
 
     impl $name {
         pub fn from_server(
@@ -56,15 +85,6 @@ macro_rules! result_collection {
             })
         }
 
-        pub fn parse_file(filename: impl AsRef<Path>) -> Result<Self, Box<dyn std::error::Error>> {
-            Python::with_gil(|py| {
-                let m = PyModule::import(py, "openff.qcsubmit.results").unwrap();
-                Ok(m.getattr(stringify!($name))?
-                    .call_method1("parse_file", (filename.as_ref(),))?
-                    .extract()?)
-            })
-        }
-
         pub fn json(&self, indent: usize) -> String {
             Python::with_gil(|py| {
                 self.0
@@ -74,16 +94,6 @@ macro_rules! result_collection {
                     (),
                     Some([("indent", indent)].into_py_dict(py)),
                 )
-                .unwrap()
-                .extract(py)
-                .unwrap()
-            })
-        }
-
-        pub fn entries(&self) -> HashMap<String, Vec<Entry>> {
-            Python::with_gil(|py| {
-                self.0
-                .getattr(py, "entries")
                 .unwrap()
                 .extract(py)
                 .unwrap()
@@ -119,6 +129,3 @@ into_py! {
     OptimizationResultCollection,
     TorsionDriveResultCollection,
 }
-
-impl BaseResultCollection for OptimizationResultCollection {}
-impl BaseResultCollection for TorsionDriveResultCollection {}
