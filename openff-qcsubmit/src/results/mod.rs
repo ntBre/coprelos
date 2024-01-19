@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::path::Path;
 
 use pyo3::{
     types::{IntoPyDict, PyModule},
@@ -55,11 +56,11 @@ macro_rules! result_collection {
             })
         }
 
-        pub fn parse_file(filename: &str) -> Result<Self, Box<dyn std::error::Error>> {
+        pub fn parse_file(filename: impl AsRef<Path>) -> Result<Self, Box<dyn std::error::Error>> {
             Python::with_gil(|py| {
                 let m = PyModule::import(py, "openff.qcsubmit.results").unwrap();
                 Ok(m.getattr(stringify!($name))?
-                .call_method1( "parse_file", (filename,))?
+                    .call_method1("parse_file", (filename.as_ref(),))?
                     .extract()?)
             })
         }
