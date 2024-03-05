@@ -69,6 +69,18 @@ impl Parameter {
         smirks, String;
     }
 
+    pub fn k(&self) -> Vec<f64> {
+        Python::with_gil(|py| {
+            let res = self.0.getattr(py, "k").unwrap();
+            if res.as_ref(py).is_instance(PyList::new(py, [0.0])).unwrap() {
+                res.extract(py).unwrap()
+            } else {
+                let res: f64 = res.extract(py).unwrap();
+                vec![res]
+            }
+        })
+    }
+
     set_props! {
         set_id => id;
     }
