@@ -5,7 +5,7 @@ use openff_qcsubmit::results::{
         ConformerRMSDFilter, ConnectivityFilter, ElementFilter, Filter,
         RecordStatusFilter, UnperceivableStereoFilter,
     },
-    OptimizationResultCollection,
+    BaseResultCollection, OptimizationResultCollection,
 };
 use qcportal::record_models::RecordStatus;
 
