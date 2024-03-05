@@ -1,11 +1,11 @@
-testflags := --
+testflags :=
 
 ifdef TFLAGS
 	testflags += $(TFLAGS)
 endif
 
 test:
-	cargo test --workspace $(testflags)
+	cargo test --workspace -- $(testflags) $(ARGS)
 
 clippy:
 	cargo clippy --workspace
