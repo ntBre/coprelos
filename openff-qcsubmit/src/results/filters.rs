@@ -103,6 +103,12 @@ impl UnperceivableStereoFilter {
     }
 }
 
+impl Default for UnperceivableStereoFilter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub trait Filter<T: BaseResultCollection> {
     /// apply is actually fairly complicated to implement because the base
     /// `apply` method in Python calls the private `_apply` method, which in
