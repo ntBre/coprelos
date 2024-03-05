@@ -2,7 +2,7 @@
 //! other features for now
 
 use pyo3::{
-    types::{IntoPyDict, PyList},
+    types::{IntoPyDict, PyList, PyModule},
     FromPyObject, Py, PyAny, PyObject, Python,
 };
 use utils::{get_props, set_props};
@@ -69,19 +69,39 @@ impl Parameter {
         smirks, String;
     }
 
+    /// Return all of the parameter's force constants as a vector.
     pub fn k(&self) -> Vec<f64> {
         Python::with_gil(|py| {
-            let res = self.0.getattr(py, "k").unwrap();
-            if res.as_ref(py).is_instance(PyList::new(py, [0.0])).unwrap() {
-                res.extract(py).unwrap()
-            } else {
-                let res: f64 = res.extract(py).unwrap();
-                vec![res]
-            }
+            let fun =
+                PyModule::from_code(py, include_str!("parameters.py"), "", "")
+                    .unwrap()
+                    .getattr("get_k")
+                    .unwrap();
+            fun.call1((&self.0,)).unwrap().extract().unwrap()
         })
     }
 
     set_props! {
         set_id => id;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::ForceField;
+
+    #[test]
+    fn get_k() {
+        let ff = ForceField::load("openff-2.1.0.offxml").unwrap();
+        // torsions should straightforwardly be list/Vec
+        let h = ff.get_parameter_handler("ProperTorsions").unwrap();
+        let ps = h.parameters();
+        assert_eq!(ps[0].k().len(), 1);
+        assert_eq!(ps[8].k().len(), 2);
+        // bonds and angles should need to be converted in `k`
+        let h = ff.get_parameter_handler("Bonds").unwrap();
+        let ps = h.parameters();
+        assert_eq!(ps[0].k().len(), 1);
+        assert_eq!(ps[8].k().len(), 1);
     }
 }
