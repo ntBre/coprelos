@@ -78,4 +78,14 @@ impl Molecule {
             self.0.setattr(py, "partial_charges", charges.0).unwrap();
         })
     }
+
+    pub fn to_smiles(&self) -> String {
+        Python::with_gil(|py| {
+            self.0
+                .call_method0(py, "to_smiles")
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
 }

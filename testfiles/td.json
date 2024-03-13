@@ -1,0 +1,70 @@
+
+{
+  "entries": {
+    "https://api.qcarchive.molssi.org:443/": [
+      {
+        "type": "torsion",
+        "record_id": "18535805",
+        "cmiles": "[H:10][c:1]1[c:2]([c:4]([c:6]([c:5]([c:3]1[H:12])[H:14])[C:7]([H:15])([H:16])[C:8]([H:17])([H:18])[F:9])[H:13])[H:11]",
+        "inchi_key": "VEEYKGRLIXCNCZ-UHFFFAOYNA-N"
+      },
+      {
+        "type": "torsion",
+        "record_id": "18535806",
+        "cmiles": "[H:8][C:1]1([C:3]([C:2]([O:7]1)([H:10])[H:11])([C:4]([H:12])([H:13])[H:14])[C:6]([H:18])([H:19])[C:5]([H:15])([H:16])[H:17])[H:9]",
+        "inchi_key": "LXGCIBZDAQMLHO-UHFFFAOYNA-N"
+      },
+      {
+        "type": "torsion",
+        "record_id": "18535807",
+        "cmiles": "[H:14][c:1]1[c:2]([c:4]([c:6]([c:5]([c:3]1[H:16])[H:18])[C@:11]([H:28])([C:7](=[O:13])[N:12]([C:9]([H:22])([H:23])[H:24])[C:10]([H:25])([H:26])[H:27])[C:8]([H:19])([H:20])[H:21])[H:17])[H:15]",
+        "inchi_key": "ULVVZAHNKGIBGY-SECBINFHNA-N"
+      },
+      {
+        "type": "torsion",
+        "record_id": "18535808",
+        "cmiles": "[H:15][c:1]1[c:3]([c:7]([c:11]([c:8]([c:4]1[H:18])[H:22])[C:14]([H:28])([c:12]2[c:9]([c:5]([c:2]([c:6]([c:10]2[H:24])[H:20])[H:16])[H:19])[H:23])[C:13]([H:25])([H:26])[H:27])[H:21])[H:17]",
+        "inchi_key": "BSZXAFXFTLXUFV-UHFFFAOYNA-N"
+      },
+      {
+        "type": "torsion",
+        "record_id": "18535809",
+        "cmiles": "[H:11][C@@:3]([C:1]([H:6])([H:7])[H:8])([C:2]([H:9])([H:10])[O:4][H:12])[O:5][H:13]",
+        "inchi_key": "DNIAPMSPPWPWGF-GSVOUGTGNA-N"
+      }
+    ]
+  },
+  "provenance": {
+    "applied-filters": {
+      "HydrogenBondFilter-0": {
+        "method": "baker-hubbard"
+      },
+      "RecordStatusFilter-1": {
+        "status": "COMPLETE"
+      },
+      "ConnectivityFilter-2": {
+        "tolerance": 1.2
+      },
+      "UnperceivableStereoFilter-3": {
+        "toolkits": [
+          "openeye",
+          "rdkit"
+        ]
+      },
+      "ElementFilter-4": {
+        "allowed_elements": [
+          "H",
+          "C",
+          "N",
+          "O",
+          "S",
+          "P",
+          "F",
+          "Cl",
+          "Br"
+        ]
+      }
+    }
+  },
+  "type": "TorsionDriveResultCollection"
+}

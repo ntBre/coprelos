@@ -1,3 +1,5 @@
+//! Modeled after MolSSI's new QCPortal API
+
 use pyo3::{types::PyModule, FromPyObject, IntoPy, Py, PyAny, Python};
 
 #[derive(FromPyObject)]
@@ -24,7 +26,7 @@ impl IntoPy<Py<PyAny>> for PortalClient {
 }
 
 pub mod record_models {
-    use pyo3::{types::PyModule, IntoPy, Py, PyAny, Python};
+    use pyo3::{types::PyModule, FromPyObject, IntoPy, Py, PyAny, Python};
 
     const PYMODULE: &str = "qcportal.record_models";
 
@@ -53,5 +55,20 @@ pub mod record_models {
             };
             en.getattr(attr).unwrap().into()
         }
+    }
+
+    #[derive(Clone, FromPyObject)]
+    pub struct TorsiondriveKeywords {
+        pub dihedrals: Vec<(usize, usize, usize, usize)>,
+    }
+
+    #[derive(Clone, FromPyObject)]
+    pub struct TorsiondriveSpecification {
+        pub keywords: TorsiondriveKeywords,
+    }
+
+    #[derive(Clone, FromPyObject)]
+    pub struct TorsiondriveRecord {
+        pub specification: TorsiondriveSpecification,
     }
 }

@@ -1,10 +1,12 @@
 use std::path::Path;
 use std::{collections::HashMap, error::Error};
 
+use openff_toolkit::Molecule;
 use pyo3::{
     types::{IntoPyDict, PyModule},
     FromPyObject, IntoPy, Py, PyAny, Python,
 };
+use qcportal::record_models::TorsiondriveRecord;
 use qcportal::PortalClient;
 use utils::{get_props, into_py};
 
@@ -18,8 +20,10 @@ pub trait BaseResultCollection
 where
     Self: Sized,
 {
+    type RecordType: for<'a> FromPyObject<'a>;
     fn parse_file(filename: impl AsRef<Path>) -> Result<Self, Box<dyn Error>>;
     fn entries(&self) -> HashMap<String, Vec<Entry>>;
+    fn to_records(&self) -> Vec<(Self::RecordType, Molecule)>;
 }
 
 #[derive(Clone, FromPyObject)]
@@ -40,11 +44,13 @@ impl Entry {
 }
 
 macro_rules! result_collection {
-($($name:ident$(,)?)*) => {
+    ($($name:ident => $record:ty$(,)?)*) => {
     $(#[derive(FromPyObject)]
     pub struct $name(Py<PyAny>);
 
     impl BaseResultCollection for $name {
+        type RecordType = $record;
+
         fn parse_file(filename: impl AsRef<Path>) -> Result<Self, Box<dyn Error>> {
             Python::with_gil(|py| {
                 let m = PyModule::import(py, "openff.qcsubmit.results").unwrap();
@@ -58,6 +64,16 @@ macro_rules! result_collection {
             Python::with_gil(|py| {
                 self.0
                 .getattr(py, "entries")
+                .unwrap()
+                .extract(py)
+                .unwrap()
+            })
+        }
+
+        fn to_records(&self) -> Vec<(Self::RecordType, Molecule)> {
+            Python::with_gil(|py| {
+                self.0
+                .call_method0(py, "to_records")
                 .unwrap()
                 .extract(py)
                 .unwrap()
@@ -121,11 +137,24 @@ macro_rules! result_collection {
 }
 
 result_collection! {
-    OptimizationResultCollection,
-    TorsionDriveResultCollection,
+    OptimizationResultCollection => TorsiondriveRecord,
+    TorsionDriveResultCollection => TorsiondriveRecord,
 }
 
 into_py! {
     OptimizationResultCollection,
     TorsionDriveResultCollection,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn get_td_records() {
+        let ds =
+            TorsionDriveResultCollection::parse_file("../testfiles/td.json")
+                .unwrap();
+        ds.to_records();
+    }
 }

@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 qcportal = { path = "../qcportal" }
 utils = { path = "../utils" }
+openff-toolkit = { path = "../openff-toolkit" }
 
 [dependencies.pyo3]
 version = "0.20.1"
