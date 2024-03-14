@@ -69,6 +69,7 @@ pub mod record_models {
 
     #[derive(Clone, FromPyObject)]
     pub struct TorsiondriveRecord {
+        pub id: usize, // from BaseRecord
         pub specification: TorsiondriveSpecification,
     }
 }
