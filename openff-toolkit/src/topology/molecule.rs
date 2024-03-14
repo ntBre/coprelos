@@ -4,6 +4,8 @@ use pyo3::{
     FromPyObject, IntoPy, Py, PyAny, Python,
 };
 
+use crate::Topology;
+
 const PYMODULE: &str = "openff.toolkit.topology.molecule";
 
 #[derive(FromPyObject)]
@@ -79,13 +81,40 @@ impl Molecule {
         })
     }
 
-    pub fn to_smiles(&self) -> String {
+    /// Return a SMILES representation of `self`, optionally in isomeric,
+    /// explicit-hydrogen, and mapped form. In Python, the default values are
+    /// `isomeric=True`, `explicit_hydrogens=True`, and `mapped=False`. For
+    /// these values, see [Molecule::to_smiles_default].
+    pub fn to_smiles(
+        &self,
+        isomeric: bool,
+        explicit_hydrogens: bool,
+        mapped: bool,
+    ) -> String {
         Python::with_gil(|py| {
             self.0
-                .call_method0(py, "to_smiles")
+                .call_method1(
+                    py,
+                    "to_smiles",
+                    (isomeric, explicit_hydrogens, mapped),
+                )
                 .unwrap()
                 .extract(py)
                 .unwrap()
         })
+    }
+
+    pub fn to_topology(&self) -> Topology {
+        Python::with_gil(|py| {
+            self.0
+                .call_method0(py, "to_topology")
+                .unwrap()
+                .extract(py)
+                .unwrap()
+        })
+    }
+
+    pub fn to_smiles_default(&self) -> String {
+        self.to_smiles(true, true, false)
     }
 }

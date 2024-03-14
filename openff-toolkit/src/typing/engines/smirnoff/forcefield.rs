@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{collections::HashMap, fmt::Display};
 
 use openff_interchange::Interchange;
 use openff_units::Quantity;
@@ -10,7 +10,10 @@ use utils::{get_props, set_props};
 
 use crate::topology::{Molecule, Topology};
 
-use super::{io::ParameterIOHandler, parameters::ParameterHandler};
+use super::{
+    io::ParameterIOHandler,
+    parameters::{Parameter, ParameterHandler},
+};
 
 const PYMODULE: &str = "openff.toolkit.typing.engines.smirnoff.forcefield";
 
@@ -165,13 +168,24 @@ impl ForceField {
         })
     }
 
-    pub fn label_molecules(&self, topology: Topology) -> Vec<Py<PyDict>> {
+    /// ForceField.label_molecules returns a list of maps of str to maps, and
+    /// the inner maps are *sometimes* not regular dicts but ValenceDicts or
+    /// ImproperDicts. For convenience of conversion to Rust, these exotic dicts
+    /// are transformed into regular dicts. For ValenceDict, this loses the
+    /// check on the first and last atom and the reversal to make the first less
+    /// than the last. For ImproperDict, this loses the sorting of the atoms
+    /// other than the central atom at index 1
+    pub fn label_molecules(
+        &self,
+        topology: Topology,
+    ) -> Vec<HashMap<String, HashMap<Vec<usize>, Parameter>>> {
         Python::with_gil(|py| {
-            self.0
-                .call_method1(py, "label_molecules", (topology.0,))
-                .unwrap()
-                .extract(py)
-                .unwrap()
+            let fun =
+                PyModule::from_code(py, include_str!("forcefield.py"), "", "")
+                    .unwrap()
+                    .getattr("label_molecules")
+                    .unwrap();
+            fun.call1((&self.0, topology.0)).unwrap().extract().unwrap()
         })
     }
 
